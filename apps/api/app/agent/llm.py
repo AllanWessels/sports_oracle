@@ -27,3 +27,10 @@ def synth_model() -> ChatAnthropic:
 def predict_model() -> ChatAnthropic:
     s = get_settings()
     return ChatAnthropic(model=s.model_predict, api_key=s.anthropic_api_key, temperature=0.2)
+
+
+@lru_cache
+def eval_model() -> ChatAnthropic:
+    """Judge model for RAGAS. Cheap + deterministic; used by the async worker."""
+    s = get_settings()
+    return ChatAnthropic(model=s.model_eval, api_key=s.anthropic_api_key, temperature=0)

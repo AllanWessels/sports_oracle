@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     model_synth: str = "claude-opus-4-8"
     model_router: str = "claude-sonnet-4-6"
     model_predict: str = "claude-opus-4-8"
+    model_eval: str = "claude-haiku-4-5"  # RAGAS judge (cheap; runs out-of-band)
+
+    # Evaluation / observability
+    eval_enabled: bool = True  # capture a trace row per turn (free; in-graph)
+    eval_sample_rate: float = 1.0  # fraction of unjudged traces the judge scores
+    eval_judge_interval_sec: int = 120  # async judge worker poll interval
 
     # MCP
     mcp_sports_url: str = "http://mcp-sports:8765/mcp"

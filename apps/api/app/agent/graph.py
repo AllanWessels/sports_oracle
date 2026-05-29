@@ -2,10 +2,13 @@
 
 Flow:
     START -> classify_and_cache
-        (cache hit)   -> stream_cached -> persist_and_cache -> END
-        (factual)     -> [gather || retrieve] -> synthesize -> persist_and_cache -> END
+        (cache hit)   -> stream_cached -> persist_and_cache -> eval_capture -> END
+        (factual)     -> [gather || retrieve] -> synthesize -> persist_and_cache -> ... -> END
         (prediction)  -> gather_predict -> reason_predict -> synthesize -> ... -> END
-        (chitchat)    -> synthesize -> persist_and_cache -> END
+        (chitchat)    -> synthesize -> persist_and_cache -> eval_capture -> END
+
+eval_capture records one trace per turn (free, graceful) for the eval + routing
+dashboards; the async judge worker scores it later.
 """
 
 from __future__ import annotations
@@ -13,6 +16,7 @@ from __future__ import annotations
 from langgraph.graph import END, START, StateGraph
 
 from app.agent.nodes.cache import persist_and_cache, stream_cached
+from app.agent.nodes.eval_capture import eval_capture
 from app.agent.nodes.predict import gather_predict, reason_predict
 from app.agent.nodes.retrieve import retrieve
 from app.agent.nodes.router import classify_and_cache
@@ -45,6 +49,7 @@ def build_graph(checkpointer=None):
     g.add_node("reason_predict", reason_predict)
     g.add_node("synthesize", synthesize)
     g.add_node("persist_and_cache", persist_and_cache)
+    g.add_node("eval_capture", eval_capture)
 
     g.add_edge(START, "classify_and_cache")
     g.add_conditional_edges(
@@ -64,6 +69,8 @@ def build_graph(checkpointer=None):
     # tails
     g.add_edge("synthesize", "persist_and_cache")
     g.add_edge("stream_cached", "persist_and_cache")
-    g.add_edge("persist_and_cache", END)
+    # capture runs last so it sees the saved conversation_id + full final state
+    g.add_edge("persist_and_cache", "eval_capture")
+    g.add_edge("eval_capture", END)
 
     return g.compile(checkpointer=checkpointer)

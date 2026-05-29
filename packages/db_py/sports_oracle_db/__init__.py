@@ -29,6 +29,7 @@ from sports_oracle_db.models import (
     Base,
     Citation,
     Conversation,
+    EvalTrace,
     Message,
     Prediction,
     SemanticCacheMeta,
@@ -43,10 +44,15 @@ from sports_oracle_db.repository import (
     find_fresh_cache_meta,
     get_conversation,
     get_messages,
+    get_unjudged_traces,
+    insert_trace,
     list_conversations,
+    list_traces,
     prediction_to_dto,
     record_cache_meta,
     touch_conversation,
+    trace_to_dict,
+    update_trace_scores,
 )
 from sports_oracle_db.session import (
     drop_models,
@@ -65,6 +71,7 @@ __all__ = [
     "Citation",
     "Prediction",
     "SemanticCacheMeta",
+    "EvalTrace",
     # session
     "get_engine",
     "get_session_factory",
@@ -90,4 +97,10 @@ __all__ = [
     "record_cache_meta",
     "bump_cache_hit",
     "find_fresh_cache_meta",
+    # repository — eval traces
+    "insert_trace",
+    "get_unjudged_traces",
+    "update_trace_scores",
+    "list_traces",
+    "trace_to_dict",
 ]
