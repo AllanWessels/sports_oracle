@@ -17,6 +17,12 @@ dist/
 .vite/
 *.local
 
+# Playwright
+test-results/
+playwright-report/
+.playwright/
+blob-report/
+
 # Data / models
 data/qdrant_storage/
 data/pgdata/
