@@ -6,8 +6,8 @@ help:
 up: ## Build + run the full stack (CPU; GPU auto-detected at runtime)
 	docker compose up --build
 
-up-gpu: ## Run the stack with the NVIDIA GPU overlay
-	docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+up-gpu: ## Run the stack with the NVIDIA GPU overlay (CUDA embeddings + web on :5173)
+	docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.gpu.yml up --build
 
 down: ## Stop the stack
 	docker compose down

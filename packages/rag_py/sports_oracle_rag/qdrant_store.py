@@ -84,11 +84,11 @@ async def ensure_collections() -> None:
         )
         logger.info("Created collection: %s", name)
 
-    # Index expires_at for sports_cache TTL filtering
-    sc_payload_schema = await client.get_collection(COLLECTION_SPORTS_CACHE)
-    existing_indexes = set(
-        sc_payload_schema.config.params.payload_schema or {}
-    )
+    # Index expires_at for sports_cache TTL filtering.
+    # Existing payload indexes live on CollectionInfo.payload_schema (a dict),
+    # not on .config.params (which has no payload_schema attribute).
+    sc_info = await client.get_collection(COLLECTION_SPORTS_CACHE)
+    existing_indexes = set(sc_info.payload_schema or {})
     if "expires_at" not in existing_indexes:
         try:
             await client.create_payload_index(
@@ -102,7 +102,7 @@ async def ensure_collections() -> None:
 
     # Index published_at for news recency queries
     news_info = await client.get_collection(COLLECTION_NEWS)
-    existing_news_indexes = set(news_info.config.params.payload_schema or {})
+    existing_news_indexes = set(news_info.payload_schema or {})
     if "published_at" not in existing_news_indexes:
         try:
             await client.create_payload_index(
