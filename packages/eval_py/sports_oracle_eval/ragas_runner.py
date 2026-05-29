@@ -103,7 +103,9 @@ def _default_runner(records: list[dict[str, Any]], judge_model: str) -> dict[str
     from sports_oracle_eval.embeddings import ragas_embeddings
 
     # temperature is deprecated on newer Claude models — don't pass it.
-    llm = LangchainLLMWrapper(ChatAnthropic(model=judge_model))
+    # max_tokens must be generous: RAGAS emits structured JSON and truncation
+    # raises LLMDidNotFinishException.
+    llm = LangchainLLMWrapper(ChatAnthropic(model=judge_model, max_tokens=4096))
     emb = ragas_embeddings()
 
     # Captured production traces have no ground-truth `reference`, so use the
@@ -117,14 +119,20 @@ def _default_runner(records: list[dict[str, Any]], judge_model: str) -> dict[str
         metrics.append(LLMContextPrecisionWithoutReference())
 
     dataset = EvaluationDataset.from_list(records)
-    result = evaluate(dataset=dataset, metrics=metrics, llm=llm, embeddings=emb)
-    # RAGAS EvaluationResult is dict-like over metric -> mean score.
+    # raise_exceptions=False: a single failing metric/judge call yields NaN for
+    # that metric instead of aborting the whole evaluation (best-effort scoring).
+    result = evaluate(
+        dataset=dataset, metrics=metrics, llm=llm, embeddings=emb, raise_exceptions=False
+    )
+    # RAGAS EvaluationResult is dict-like over metric -> mean score; drop NaN.
     out: dict[str, float] = {}
     for k, v in dict(result).items():
         try:
-            out[k] = float(v)
+            fv = float(v)
         except (TypeError, ValueError):
             continue
+        if fv == fv:  # filter NaN
+            out[k] = fv
     return out
 
 
