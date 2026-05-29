@@ -14,9 +14,30 @@ committed + pushed.
 | 6 | Prediction sub-flow + confidence blend | ✅ done | features→reason→blended (completeness×self×odds) |
 | 7 | Multi-provider breadth + hardening | 🔄 partial | providers in place; live E2E + rate-limit tuning pending |
 
-All component unit suites pass locally (mcp_sports 69, db 19, rag 58, api 2).
-Remaining before a live demo: `docker compose up` end-to-end verification with a
-real `ANTHROPIC_API_KEY`, and confirming live provider endpoints respond.
+**149 tests pass locally** (mcp_sports 69, db 19, rag 58, api 3). The api suite
+includes an in-process graph-flow integration test (router→gather→synthesize→
+persist with mocked Claude/MCP and gracefully-degraded DB/RAG). The full FastAPI
+app + LangGraph graph import and build cleanly.
+
+Remaining before a live demo (needs Docker + a real `ANTHROPIC_API_KEY`, which
+this build environment lacks): `docker compose up` end-to-end run, and confirming
+the live free-provider endpoints respond. See "Verification" below.
+
+## Verification
+
+```bash
+cp .env.example .env && $EDITOR .env      # set ANTHROPIC_API_KEY
+make up                                    # or: make up-gpu
+make seed                                  # load reference corpus into Qdrant
+# open http://localhost:5173 and ask:
+#   "What are the offside rules?"          -> RAG reference citation
+#   "When do the Lakers play next?"        -> MCP tool + citation
+#   "Who will win Arsenal vs Chelsea?"     -> prediction + confidence badge
+make test                                  # run all suites in the api container
+```
+
+Fast-degradation guards (3–4s timeouts) ensure a down Qdrant/DB never stalls a
+turn — the agent answers from whatever sources are available.
 
 Legend: ✅ done · 🔄 in progress · ⬜ todo
 

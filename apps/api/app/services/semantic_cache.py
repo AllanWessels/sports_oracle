@@ -7,6 +7,7 @@ backend is unavailable.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from typing import Optional
@@ -14,6 +15,9 @@ from typing import Optional
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
+
+# A down vector store must degrade fast, not stall the request on client retries.
+_BACKEND_TIMEOUT_S = 3.0
 
 
 async def lookup(query: str, entities: dict) -> Optional[dict]:
@@ -31,8 +35,11 @@ async def lookup(query: str, entities: dict) -> Optional[dict]:
                 )
             ]
         )
-        hits = await hybrid_search(query, COLLECTION_SPORTS_CACHE, top_k=1, filters=flt)
-    except Exception as exc:  # noqa: BLE001
+        hits = await asyncio.wait_for(
+            hybrid_search(query, COLLECTION_SPORTS_CACHE, top_k=1, filters=flt),
+            timeout=_BACKEND_TIMEOUT_S,
+        )
+    except (Exception, asyncio.TimeoutError) as exc:  # noqa: BLE001
         logger.debug("Semantic cache unavailable: %s", exc)
         return None
 
