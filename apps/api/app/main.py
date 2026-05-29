@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent.graph import build_graph
-from app.api import routes_chat, routes_health, routes_history
+from app.api import routes_chat, routes_health, routes_history, routes_metrics
 from app.config import get_settings
 from app.mcp.client import init_mcp
 
@@ -74,6 +74,7 @@ def create_app() -> FastAPI:
     app.include_router(routes_health.router)
     app.include_router(routes_chat.router)
     app.include_router(routes_history.router)
+    app.include_router(routes_metrics.router)
     return app
 
 

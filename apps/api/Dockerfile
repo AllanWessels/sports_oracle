@@ -15,9 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY packages/shared_py /app/packages/shared_py
 COPY packages/rag_py /app/packages/rag_py
 COPY packages/db_py /app/packages/db_py
+COPY packages/eval_py /app/packages/eval_py
 RUN pip install -e /app/packages/shared_py \
  && pip install -e /app/packages/rag_py \
- && pip install -e /app/packages/db_py
+ && pip install -e /app/packages/db_py \
+ && pip install -e /app/packages/eval_py
 
 # Install the API app.
 COPY apps/api /app/apps/api
