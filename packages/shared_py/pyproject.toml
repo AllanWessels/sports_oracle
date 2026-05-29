@@ -1,0 +1,13 @@
+[project]
+name = "sports-oracle-shared"
+version = "0.1.0"
+description = "Shared pydantic DTOs and contracts for the Sports Oracle services."
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2.9,<3"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sports_oracle_shared"]

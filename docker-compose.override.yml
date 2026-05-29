@@ -1,0 +1,28 @@
+# Local dev overrides — applied automatically by `docker compose up`.
+# Bind-mounts source and enables hot reload so changes don't require rebuilds.
+services:
+  api:
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  mcp-sports:
+    volumes:
+      - ./apps/mcp_sports:/app/apps/mcp_sports
+      - ./packages:/app/packages
+
+  ingest-worker:
+    volumes:
+      - ./apps/ingest:/app/apps/ingest
+      - ./packages:/app/packages
+
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0 --port 80

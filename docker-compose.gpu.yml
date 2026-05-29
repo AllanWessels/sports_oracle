@@ -1,0 +1,26 @@
+# GPU overlay — opt in with:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+# Requires the NVIDIA Container Toolkit on the host. Without it, omit this file
+# and the services fall back to CPU (EMBED_DEVICE=auto handles the downgrade).
+services:
+  api:
+    environment:
+      EMBED_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  ingest-worker:
+    environment:
+      EMBED_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
