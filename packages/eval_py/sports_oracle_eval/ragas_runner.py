@@ -124,15 +124,20 @@ def _default_runner(records: list[dict[str, Any]], judge_model: str) -> dict[str
     result = evaluate(
         dataset=dataset, metrics=metrics, llm=llm, embeddings=emb, raise_exceptions=False
     )
-    # RAGAS EvaluationResult is dict-like over metric -> mean score; drop NaN.
+    # EvaluationResult is NOT a metric->score mapping (dict(result) indexes it by
+    # row and raises KeyError). Aggregate via the dataframe: mean of each numeric
+    # metric column, dropping NaN (failed metrics).
+    import pandas as pd
+
+    df = result.to_pandas()
     out: dict[str, float] = {}
-    for k, v in dict(result).items():
-        try:
-            fv = float(v)
-        except (TypeError, ValueError):
+    for col in df.columns:
+        series = df[col]
+        if not pd.api.types.is_numeric_dtype(series):
             continue
-        if fv == fv:  # filter NaN
-            out[k] = fv
+        mean = series.mean()
+        if mean == mean:  # not NaN
+            out[col] = float(mean)
     return out
 
 
