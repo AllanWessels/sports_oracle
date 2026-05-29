@@ -24,7 +24,8 @@ class Settings(BaseSettings):
 
     # MCP
     mcp_sports_url: str = "http://mcp-sports:8765/mcp"
-    mcp_transport: str = "streamable-http"
+    # langchain-mcp-adapters expects the underscore form (not "streamable-http").
+    mcp_transport: str = "streamable_http"
 
     # Postgres
     database_url: str = "postgresql+asyncpg://oracle:oracle@postgres:5432/sports_oracle"

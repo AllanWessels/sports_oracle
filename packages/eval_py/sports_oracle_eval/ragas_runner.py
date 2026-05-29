@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from sports_oracle_eval.schema import RAGAS_METRICS, RagasScores
+from sports_oracle_eval.schema import RagasScores
 
 # A runner maps (records, judge_model) -> {metric_name: mean_score}.
 Runner = Callable[[list[dict[str, Any]], str], dict[str, float]]
@@ -58,14 +58,33 @@ def samples_to_records(samples: list[Mapping[str, Any]]) -> list[dict[str, Any]]
 
 
 def scores_from_means(means: Mapping[str, Any]) -> RagasScores:
-    """Build a RagasScores from a {metric: mean} mapping, ignoring extras."""
+    """Build a RagasScores from a {metric: mean} mapping.
+
+    Tolerant of RAGAS's verbose metric names (e.g.
+    ``llm_context_precision_without_reference``) by fuzzy-matching onto our four
+    canonical fields. Non-numeric / unknown keys are ignored.
+    """
     def _num(v: Any) -> float | None:
         try:
             return float(v) if v is not None else None
         except (TypeError, ValueError):
             return None
 
-    return RagasScores(**{m: _num(means.get(m)) for m in RAGAS_METRICS})
+    out: dict[str, float] = {}
+    for raw_key, raw_val in means.items():
+        num = _num(raw_val)
+        if num is None:
+            continue
+        key = raw_key.lower()
+        if "faith" in key:
+            out["faithfulness"] = num
+        elif "relevanc" in key:
+            out["answer_relevancy"] = num
+        elif "recall" in key:  # check before "precision" (context_recall)
+            out["context_recall"] = num
+        elif "precision" in key:
+            out["context_precision"] = num
+    return RagasScores(**out)
 
 
 def _default_runner(records: list[dict[str, Any]], judge_model: str) -> dict[str, float]:
@@ -75,6 +94,7 @@ def _default_runner(records: list[dict[str, Any]], judge_model: str) -> dict[str
     from ragas.llms import LangchainLLMWrapper
     from ragas.metrics import (
         Faithfulness,
+        LLMContextPrecisionWithoutReference,
         LLMContextPrecisionWithReference,
         LLMContextRecall,
         ResponseRelevancy,
@@ -82,18 +102,30 @@ def _default_runner(records: list[dict[str, Any]], judge_model: str) -> dict[str
 
     from sports_oracle_eval.embeddings import ragas_embeddings
 
-    llm = LangchainLLMWrapper(ChatAnthropic(model=judge_model, temperature=0))
+    # temperature is deprecated on newer Claude models — don't pass it.
+    llm = LangchainLLMWrapper(ChatAnthropic(model=judge_model))
     emb = ragas_embeddings()
-    metrics = [
-        Faithfulness(),
-        ResponseRelevancy(),
-        LLMContextPrecisionWithReference(),
-        LLMContextRecall(),
-    ]
+
+    # Captured production traces have no ground-truth `reference`, so use the
+    # reference-free metrics; only the golden set (which supplies a reference)
+    # gets context-recall + reference-based precision.
+    has_reference = any(r.get("reference") for r in records)
+    metrics = [Faithfulness(), ResponseRelevancy()]
+    if has_reference:
+        metrics += [LLMContextPrecisionWithReference(), LLMContextRecall()]
+    else:
+        metrics.append(LLMContextPrecisionWithoutReference())
+
     dataset = EvaluationDataset.from_list(records)
     result = evaluate(dataset=dataset, metrics=metrics, llm=llm, embeddings=emb)
     # RAGAS EvaluationResult is dict-like over metric -> mean score.
-    return {k: float(v) for k, v in dict(result).items()}
+    out: dict[str, float] = {}
+    for k, v in dict(result).items():
+        try:
+            out[k] = float(v)
+        except (TypeError, ValueError):
+            continue
+    return out
 
 
 def evaluate_samples(
