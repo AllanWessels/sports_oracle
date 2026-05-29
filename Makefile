@@ -1,4 +1,4 @@
-.PHONY: help up up-gpu down build logs seed ingest test lint fmt ps
+.PHONY: help up up-gpu down build logs seed ingest test lint fmt ps eval
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -35,3 +35,12 @@ lint: ## Lint python with ruff + mypy
 
 fmt: ## Auto-format python with ruff
 	docker compose run --rm api ruff format .
+
+# Eval scorecard over the golden set. Self-contained (mounts the repo into a
+# clean python image, installs the workspace packages in dependency order).
+# Export ANTHROPIC_API_KEY for the RAGAS judge, or pass EVAL_ARGS=--citations-only.
+eval: ## Run the eval scorecard over the golden set (export ANTHROPIC_API_KEY)
+	docker run --rm -v "$(PWD)":/repo -w /repo \
+	  -e ANTHROPIC_API_KEY -e MODEL_EVAL python:3.11-slim sh -lc '\
+	    pip install -q -e packages/shared_py -e packages/rag_py -e "packages/eval_py[ragas]" && \
+	    python -m sports_oracle_eval.run $(EVAL_ARGS)'
