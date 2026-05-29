@@ -15,6 +15,7 @@ import {
 import { getRoutingMetrics } from '../../api/metrics'
 import { usePolling } from '../../hooks/usePolling'
 import { DashboardNav } from './DashboardNav'
+import { GraphPanel } from './GraphPanel'
 
 const ROUTE_COLORS: Record<string, string> = {
   factual: '#38bdf8',
@@ -61,6 +62,8 @@ export function RoutingDashboard() {
               <Stat label="Tool-call rate" value={`${(data.tool_call_rate * 100).toFixed(0)}%`} />
               <Stat label="Routes" value={String(routeRows.length)} />
             </div>
+
+            <GraphPanel routes={data.routes} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <section className="rounded-xl bg-surface-800 border border-surface-700 p-4">

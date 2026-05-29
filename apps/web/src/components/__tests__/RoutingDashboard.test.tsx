@@ -7,6 +7,14 @@ vi.mock('../../api/metrics', () => ({
   getRoutingMetrics: vi.fn(),
 }))
 
+// mermaid renders SVG via browser APIs jsdom lacks; stub it for the unit test.
+vi.mock('mermaid', () => ({
+  default: {
+    initialize: vi.fn(),
+    render: vi.fn().mockResolvedValue({ svg: '<svg data-testid="mock-graph"></svg>' }),
+  },
+}))
+
 import { getRoutingMetrics } from '../../api/metrics'
 
 const SAMPLE = {
