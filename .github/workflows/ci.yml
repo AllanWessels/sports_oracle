@@ -33,6 +33,7 @@ jobs:
       - name: Install component (editable, shared first)
         run: |
           python -m pip install --upgrade pip
+          pip install ruff   # lint tool — installed explicitly, not all packages list it
           for pkg in ${{ matrix.component.install }}; do
             pip install -e "$pkg"
           done

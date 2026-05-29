@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
-
 from sports_oracle_rag.chunking import (
     _approx_tokens,
     cache_summarize,
     heading_aware_chunk,
     paragraph_chunk,
 )
-
 
 # ---------------------------------------------------------------------------
 # _approx_tokens
