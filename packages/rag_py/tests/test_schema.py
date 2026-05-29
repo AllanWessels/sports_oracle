@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-import pytest
-
 from sports_oracle_rag.schema import (
     COLLECTION_NEWS,
     COLLECTION_REFERENCE_DOCS,

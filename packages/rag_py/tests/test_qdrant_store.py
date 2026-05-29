@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -85,7 +84,7 @@ class TestRecencyBoost:
         assert boost > 0.99
 
     def test_one_half_life_is_half(self):
-        from sports_oracle_rag.qdrant_store import _recency_boost, _RECENCY_HALF_LIFE_DAYS
+        from sports_oracle_rag.qdrant_store import _RECENCY_HALF_LIFE_DAYS, _recency_boost
         t = datetime.now(UTC) - timedelta(days=_RECENCY_HALF_LIFE_DAYS)
         boost = _recency_boost(t)
         assert abs(boost - 0.5) < 0.01
@@ -172,7 +171,6 @@ class TestHybridSearch:
     @pytest.mark.asyncio
     async def test_sports_cache_adds_expires_filter(self, mock_embeddings, mock_qdrant_client):
         """Verify that querying sports_cache injects an expires_at > now filter."""
-        from qdrant_client import models
         from sports_oracle_rag import qdrant_store
 
         captured_calls = []
@@ -267,6 +265,7 @@ class TestHybridSearch:
 class TestBuildPoint:
     def test_returns_point_struct(self):
         from qdrant_client import models as qmodels
+
         from sports_oracle_rag.qdrant_store import build_point
 
         with (

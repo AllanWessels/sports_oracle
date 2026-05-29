@@ -9,7 +9,7 @@ dependencies = [
     "pydantic>=2.9,<3",
     "cachetools>=5.5,<6",
     "tenacity>=9,<10",
-    "sports-oracle-shared @ file:///${PROJECT_ROOT}/../../packages/shared_py",
+    "sports-oracle-shared>=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -23,6 +23,9 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["core", "providers", "tools"]

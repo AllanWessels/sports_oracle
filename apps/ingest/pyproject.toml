@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Sports Oracle ingest worker: RSS news, reference docs, and cache reindex."
 requires-python = ">=3.11"
 dependencies = [
-    "sports-oracle-rag @ file://../../packages/rag_py",
+    "sports-oracle-rag>=0.1.0",
     "apscheduler>=3.10,<4",
     "feedparser>=6,<7",
     "pydantic-settings>=2.3,<3",
@@ -14,6 +14,9 @@ dependencies = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["jobs"]
