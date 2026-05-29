@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sys
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -74,6 +75,18 @@ async def main() -> None:
         args=["reindex"],
         id="reindex",
         name="Cache Purge + Reindex",
+        max_instances=1,
+        coalesce=True,
+    )
+
+    # Eval judge: score captured traces with RAGAS, out of band.
+    eval_interval = int(os.getenv("EVAL_JUDGE_INTERVAL_SEC", "120"))
+    scheduler.add_job(
+        _run_job,
+        trigger=IntervalTrigger(seconds=eval_interval),
+        args=["eval_judge"],
+        id="eval_judge",
+        name="Eval Judge (RAGAS)",
         max_instances=1,
         coalesce=True,
     )
