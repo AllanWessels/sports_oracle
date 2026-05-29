@@ -8,7 +8,9 @@ from typing import Any, Optional
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     CheckConstraint,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -182,3 +184,64 @@ class SemanticCacheMeta(Base):
     )
 
     __table_args__ = (Index("ix_semantic_cache_meta_expires_at", "expires_at"),)
+
+
+class EvalTrace(Base):
+    """One captured turn for evaluation + routing observability.
+
+    Written by the in-graph capture node for every turn (free; no LLM). The
+    RAGAS score columns are filled in later, out of band, by the async judge
+    worker — they are NULL until then.
+    """
+
+    __tablename__ = "eval_traces"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        server_default=text("gen_random_uuid()"),
+    )
+    # Not an FK: eval stays decoupled from the chat tables (a trace can outlive
+    # or precede its conversation row).
+    conversation_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+
+    # --- what happened on the turn (captured immediately) ---
+    query: Mapped[str] = mapped_column(Text, nullable=False)
+    intent: Mapped[str] = mapped_column(Text, nullable=False)
+    route: Mapped[str] = mapped_column(Text, nullable=False)
+    cache_hit: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default=text("false"), nullable=False
+    )
+    num_tool_results: Mapped[int] = mapped_column(
+        Integer, default=0, server_default=text("0"), nullable=False
+    )
+    num_rag_hits: Mapped[int] = mapped_column(
+        Integer, default=0, server_default=text("0"), nullable=False
+    )
+    contexts: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    citations: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
+    prediction: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
+    latency_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        default=_now,
+        server_default=text("now()"),
+        nullable=False,
+    )
+
+    # --- RAGAS / citation scores (filled by the async judge worker) ---
+    faithfulness: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    answer_relevancy: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    context_precision: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    context_recall: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    citation_valid: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    judged_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    judge_model: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    __table_args__ = (
+        Index("ix_eval_traces_created_at", "created_at"),
+        Index("ix_eval_traces_intent", "intent"),
+        # Partial-ish: speeds the judge worker's "unjudged" scan.
+        Index("ix_eval_traces_judged_at", "judged_at"),
+    )

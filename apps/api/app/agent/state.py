@@ -35,3 +35,5 @@ class OracleState(TypedDict, total=False):
     prediction: Optional[Prediction]
     citations: list[Citation]
     answer: str
+
+    started_at: float  # epoch seconds, set at classify; used for turn latency

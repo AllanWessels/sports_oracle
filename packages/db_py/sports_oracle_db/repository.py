@@ -16,6 +16,7 @@ from sports_oracle_shared.enums import Intent
 from sports_oracle_db.models import (
     Citation,
     Conversation,
+    EvalTrace,
     Message,
     Prediction,
     SemanticCacheMeta,
@@ -299,3 +300,138 @@ async def find_fresh_cache_meta(
     )
     result = await session.execute(stmt)
     return list(result.scalars().all())
+
+
+# ---------------------------------------------------------------------------
+# Eval trace helpers
+# ---------------------------------------------------------------------------
+
+# RAGAS / citation score columns the judge worker fills in.
+_SCORE_FIELDS = (
+    "faithfulness",
+    "answer_relevancy",
+    "context_precision",
+    "context_recall",
+    "citation_valid",
+)
+
+
+async def insert_trace(
+    session: AsyncSession,
+    *,
+    query: str,
+    intent: str,
+    route: str,
+    answer: str,
+    cache_hit: bool = False,
+    num_tool_results: int = 0,
+    num_rag_hits: int = 0,
+    contexts: Optional[list] = None,
+    citations: Optional[list] = None,
+    prediction: Optional[dict] = None,
+    latency_ms: Optional[int] = None,
+    conversation_id: Optional[uuid.UUID | str] = None,
+) -> EvalTrace:
+    """Insert one captured turn (scores are filled in later by the judge)."""
+    cid = (
+        uuid.UUID(str(conversation_id))
+        if conversation_id and not isinstance(conversation_id, uuid.UUID)
+        else conversation_id
+    )
+    trace = EvalTrace(
+        conversation_id=cid,
+        query=query,
+        intent=intent,
+        route=route,
+        answer=answer,
+        cache_hit=cache_hit,
+        num_tool_results=num_tool_results,
+        num_rag_hits=num_rag_hits,
+        contexts=contexts,
+        citations=citations,
+        prediction=prediction,
+        latency_ms=latency_ms,
+    )
+    session.add(trace)
+    await session.flush()
+    await session.refresh(trace)
+    return trace
+
+
+async def get_unjudged_traces(session: AsyncSession, limit: int = 20) -> list[EvalTrace]:
+    """Oldest-first traces that have not been scored yet."""
+    stmt = (
+        select(EvalTrace)
+        .where(EvalTrace.judged_at.is_(None))
+        .order_by(EvalTrace.created_at)
+        .limit(limit)
+    )
+    result = await session.execute(stmt)
+    return list(result.scalars().all())
+
+
+async def update_trace_scores(
+    session: AsyncSession,
+    trace_id: uuid.UUID | str,
+    *,
+    judge_model: str,
+    scores: dict,
+    now: Optional[datetime] = None,
+) -> None:
+    """Write RAGAS/citation scores onto a trace and stamp ``judged_at``.
+
+    *scores* may contain any of ``_SCORE_FIELDS``; missing keys are left NULL.
+    """
+    tid = uuid.UUID(str(trace_id)) if not isinstance(trace_id, uuid.UUID) else trace_id
+    values: dict = {
+        k: scores[k] for k in _SCORE_FIELDS if k in scores and scores[k] is not None
+    }
+    values["judge_model"] = judge_model
+    values["judged_at"] = now or datetime.now(timezone.utc)
+    await session.execute(update(EvalTrace).where(EvalTrace.id == tid).values(**values))
+
+
+async def list_traces(
+    session: AsyncSession,
+    *,
+    limit: int = 100,
+    offset: int = 0,
+    intent: Optional[str] = None,
+    since: Optional[datetime] = None,
+) -> list[EvalTrace]:
+    """Recent traces, newest first, optionally filtered by intent / time window."""
+    stmt = select(EvalTrace)
+    if intent:
+        stmt = stmt.where(EvalTrace.intent == intent)
+    if since:
+        stmt = stmt.where(EvalTrace.created_at >= since)
+    stmt = stmt.order_by(EvalTrace.created_at.desc()).limit(limit).offset(offset)
+    result = await session.execute(stmt)
+    return list(result.scalars().all())
+
+
+def trace_to_dict(row: EvalTrace) -> dict:
+    """Serialize an EvalTrace to plain JSON-able types (for API / judge / agg)."""
+    return {
+        "id": str(row.id),
+        "conversation_id": str(row.conversation_id) if row.conversation_id else None,
+        "query": row.query,
+        "intent": row.intent,
+        "route": row.route,
+        "cache_hit": row.cache_hit,
+        "num_tool_results": row.num_tool_results,
+        "num_rag_hits": row.num_rag_hits,
+        "contexts": row.contexts,
+        "answer": row.answer,
+        "citations": row.citations,
+        "prediction": row.prediction,
+        "latency_ms": row.latency_ms,
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+        "faithfulness": row.faithfulness,
+        "answer_relevancy": row.answer_relevancy,
+        "context_precision": row.context_precision,
+        "context_recall": row.context_recall,
+        "citation_valid": row.citation_valid,
+        "judged_at": row.judged_at.isoformat() if row.judged_at else None,
+        "judge_model": row.judge_model,
+    }

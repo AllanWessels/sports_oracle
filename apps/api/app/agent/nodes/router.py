@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -27,6 +28,7 @@ def _extract_json(text: str) -> dict:
 
 async def classify_and_cache(state: OracleState) -> dict:
     query = state["query"]
+    started_at = time.time()  # turn clock starts here, for eval-capture latency
 
     # 1. Classify intent + entities.
     resp = await router_model().ainvoke(
@@ -48,4 +50,9 @@ async def classify_and_cache(state: OracleState) -> dict:
         cache_hit = await semantic_cache.lookup(query, entities)
 
     logger.info("Routed intent=%s entities=%s cache_hit=%s", intent, entities, bool(cache_hit))
-    return {"intent": intent, "entities": entities, "cache_hit": cache_hit}
+    return {
+        "intent": intent,
+        "entities": entities,
+        "cache_hit": cache_hit,
+        "started_at": started_at,
+    }
