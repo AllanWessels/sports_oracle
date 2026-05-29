@@ -1,0 +1,40 @@
+[project]
+name = "mcp-sports"
+version = "0.1.0"
+description = "MCP server exposing normalized sports tools backed by free REST APIs."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.2,<2",
+    "httpx>=0.27,<0.28",
+    "pydantic>=2.9,<3",
+    "cachetools>=5.5,<6",
+    "tenacity>=9,<10",
+    "sports-oracle-shared @ file:///${PROJECT_ROOT}/../../packages/shared_py",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "respx>=0.21",
+    "ruff>=0.4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["core", "providers", "tools"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]

@@ -1,0 +1,106 @@
+{
+  "leagues": [
+    {
+      "id": "eng.1",
+      "name": "English Premier League",
+      "abbreviation": "EPL",
+      "season": {"year": 2025, "type": 2}
+    }
+  ],
+  "events": [
+    {
+      "id": "663377",
+      "date": "2025-03-15T15:00Z",
+      "season": {"year": 2025},
+      "league": {"name": "English Premier League", "abbreviation": "EPL"},
+      "status": {
+        "type": {
+          "id": "3",
+          "name": "STATUS_FINAL",
+          "state": "post",
+          "completed": true,
+          "description": "Final",
+          "detail": "Full Time"
+        }
+      },
+      "competitions": [
+        {
+          "id": "663377",
+          "date": "2025-03-15T15:00Z",
+          "venue": {"fullName": "Old Trafford"},
+          "competitors": [
+            {
+              "id": "360",
+              "homeAway": "home",
+              "score": "2",
+              "team": {
+                "id": "360",
+                "displayName": "Manchester United",
+                "abbreviation": "MAN",
+                "logos": [{"href": "https://a.espncdn.com/i/teamlogos/soccer/500/360.png"}]
+              }
+            },
+            {
+              "id": "382",
+              "homeAway": "away",
+              "score": "1",
+              "team": {
+                "id": "382",
+                "displayName": "Arsenal",
+                "abbreviation": "ARS",
+                "logos": [{"href": "https://a.espncdn.com/i/teamlogos/soccer/500/382.png"}]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "663378",
+      "date": "2025-03-16T14:00Z",
+      "season": {"year": 2025},
+      "league": {"name": "English Premier League", "abbreviation": "EPL"},
+      "status": {
+        "type": {
+          "id": "2",
+          "name": "STATUS_IN_PROGRESS",
+          "state": "in",
+          "completed": false,
+          "description": "In Progress",
+          "detail": "72'"
+        }
+      },
+      "competitions": [
+        {
+          "id": "663378",
+          "date": "2025-03-16T14:00Z",
+          "venue": {"fullName": "Anfield"},
+          "competitors": [
+            {
+              "id": "364",
+              "homeAway": "home",
+              "score": "3",
+              "team": {
+                "id": "364",
+                "displayName": "Liverpool",
+                "abbreviation": "LIV",
+                "logos": [{"href": "https://a.espncdn.com/i/teamlogos/soccer/500/364.png"}]
+              }
+            },
+            {
+              "id": "383",
+              "homeAway": "away",
+              "score": "1",
+              "team": {
+                "id": "383",
+                "displayName": "Chelsea",
+                "abbreviation": "CHE",
+                "logos": [{"href": "https://a.espncdn.com/i/teamlogos/soccer/500/383.png"}]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

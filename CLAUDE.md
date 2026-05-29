@@ -13,14 +13,19 @@ MCP-wrapped free sports APIs + hybrid RAG on Qdrant. See
 ## Repo map
 
 ```
-apps/api/         FastAPI + LangGraph agent (MCP client, RAG)
-apps/mcp_sports/  FastMCP server wrapping free sports APIs
-apps/ingest/      Scheduled RAG ingestion worker
-apps/web/         Vite + React chat UI
+apps/api/            FastAPI + LangGraph agent — the integration hub (MCP client, RAG, SSE)
+apps/mcp_sports/     FastMCP server wrapping free sports APIs (9 tools, 4 providers)
+apps/ingest/         Scheduled RAG ingestion worker (reference docs, news, TTL sweeps)
+apps/web/            Vite + React streaming chat UI (citations + confidence badge)
 packages/shared_py/  Shared pydantic DTOs — THE CONTRACT between services
-docs/             Architecture, progress, capabilities
-data/reference/   Seed reference corpus (rules/history) for RAG
+packages/rag_py/     RAG library: fastembed hybrid search + rerank over Qdrant (GPU-aware)
+packages/db_py/      SQLAlchemy 2.0 async persistence + Alembic migrations
+docs/                Architecture, progress, capabilities
+data/reference/      Seed reference corpus (rules/history) for RAG
 ```
+
+The four `packages/`/`apps/` components are independent and were built in
+parallel; `apps/api/app/agent/graph.py` is the hub that wires them together.
 
 ## The contract comes first
 
@@ -40,9 +45,23 @@ adapter normalizes upstream JSON into the shared sports models.
 
 ## Build order & status
 
-Work proceeds in phases (see `docs/PROGRESS.md`). Independent components
-(`mcp_sports`, `rag`, `db`, `web`) are built in parallel; the LangGraph
-`graph.py` is the integration hub that ties them together.
+Phases M0–M6 are done; M7 (live E2E + provider hardening) is partial — see
+`docs/PROGRESS.md`. 149 unit/integration tests pass across all components.
+
+## Running & testing
+
+```bash
+cp .env.example .env          # set ANTHROPIC_API_KEY; sports works keyless
+make up        # full stack (CPU)      |  make up-gpu  # NVIDIA overlay
+make seed      # load reference corpus into Qdrant
+make test      # all pytest suites in the api container
+```
+
+Per-component tests run with PYTHONPATH set to the package(s) under test plus
+`packages/shared_py`, e.g.
+`PYTHONPATH=apps/mcp_sports:packages/shared_py pytest apps/mcp_sports/tests`.
+The api graph-flow test is hermetic — it mocks Claude/MCP and stubs RAG/DB, so
+it never downloads models or needs live services.
 
 ## After each milestone
 
