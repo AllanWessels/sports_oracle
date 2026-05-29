@@ -1,4 +1,4 @@
-.PHONY: help up up-gpu down build logs seed ingest test lint fmt ps eval
+.PHONY: help up up-gpu down build logs seed ingest test lint fmt ps eval migrate
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -20,6 +20,9 @@ logs: ## Tail logs
 
 ps: ## Show running services
 	docker compose ps
+
+migrate: ## Apply DB migrations (creates app tables incl. eval_traces)
+	docker compose run --rm -w /app/packages/db_py api alembic upgrade head
 
 seed: ## Load the reference-docs corpus into Qdrant
 	docker compose run --rm ingest-worker python -m jobs.reference_docs

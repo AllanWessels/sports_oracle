@@ -12,14 +12,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # ---------------------------------------------------------------------------
-# Install shared_py, rag_py, then the ingest app
+# Install workspace packages in dependency order, then the ingest app.
+# ingest now also depends on db_py (for eval_traces) and eval_py[ragas]
+# (the async RAGAS judge job), so both must be installed before the app.
 # ---------------------------------------------------------------------------
 COPY packages/shared_py /app/packages/shared_py
 COPY packages/rag_py    /app/packages/rag_py
+COPY packages/db_py     /app/packages/db_py
+COPY packages/eval_py   /app/packages/eval_py
 COPY apps/ingest        /app/apps/ingest
 
 RUN pip install --no-cache-dir /app/packages/shared_py
 RUN pip install --no-cache-dir /app/packages/rag_py
+RUN pip install --no-cache-dir /app/packages/db_py
+RUN pip install --no-cache-dir /app/packages/eval_py
 RUN pip install --no-cache-dir /app/apps/ingest
 
 # ---------------------------------------------------------------------------
