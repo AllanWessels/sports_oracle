@@ -66,5 +66,4 @@ it never downloads models or needs live services.
 ## After each milestone
 
 Update `docs/PROGRESS.md`, refresh this file and `docs/SKILLS.md` if
-capabilities changed, then commit + push to
-`claude/sports-oracle-mcp-langgraph-UKbkw`.
+capabilities changed, then commit + push to `main`.
