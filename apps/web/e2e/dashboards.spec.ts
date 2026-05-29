@@ -19,6 +19,11 @@ test('navigates from chat to the routing dashboard and renders live data', async
   await expect(page.getByTestId('stat-Cache hit rate')).toHaveText('20%')
   await expect(page.getByTestId('route-factual')).toContainText('3')
   await expect(page.getByTestId('route-prediction')).toBeVisible()
+
+  // The LangGraph diagram panel renders a real Mermaid SVG with the nodes.
+  await expect(page.getByTestId('graph-panel')).toBeVisible()
+  await expect(page.locator('[data-testid="graph-svg"] svg')).toBeVisible()
+  await expect(page.getByTestId('graph-svg')).toContainText('classify_and_cache')
 })
 
 test('navigates routing -> eval via the dashboard nav and shows RAGAS scores', async ({ page }) => {
