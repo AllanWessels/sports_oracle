@@ -21,15 +21,15 @@ _here = os.path.dirname(os.path.abspath(__file__))
 if _here not in sys.path:
     sys.path.insert(0, _here)
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP  # noqa: E402
 
-import tools.fixtures as fixtures_mod
-import tools.h2h as h2h_mod
-import tools.injuries as injuries_mod
-import tools.odds as odds_mod
-import tools.search as search_mod
-import tools.standings as standings_mod
-import tools.stats as stats_mod
+import tools.fixtures as fixtures_mod  # noqa: E402
+import tools.h2h as h2h_mod  # noqa: E402
+import tools.injuries as injuries_mod  # noqa: E402
+import tools.odds as odds_mod  # noqa: E402
+import tools.search as search_mod  # noqa: E402
+import tools.standings as standings_mod  # noqa: E402
+import tools.stats as stats_mod  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,

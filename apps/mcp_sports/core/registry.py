@@ -234,10 +234,7 @@ class ProviderRegistry:
     async def get_injuries(
         self, sport: Sport, team_id: str
     ) -> tuple[list[Injury], str, bool]:
-        if sport == Sport.SOCCER:
-            chain = [self._apisports, self._espn]
-        else:
-            chain = [self._espn]
+        chain = [self._apisports, self._espn] if sport == Sport.SOCCER else [self._espn]
         return await self._first_list(chain, "get_injuries", sport, team_id)
 
     # ------------------------------------------------------------------

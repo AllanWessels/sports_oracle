@@ -35,10 +35,10 @@ def register(mcp: FastMCP) -> None:
         sport_enum = _parse_sport(sport)
         status_enum: FixtureStatus | None = None
         if status:
-            try:
+            import contextlib
+
+            with contextlib.suppress(ValueError):
                 status_enum = FixtureStatus(status.lower())
-            except ValueError:
-                pass
 
         registry = get_registry()
         fixtures, provider, partial = await registry.get_fixtures(

@@ -153,7 +153,13 @@ def heading_aware_chunk(
                                 current_words = overlap_words + sent.split()
                                 current_tokens = _approx_tokens(" ".join(current_words))
                             else:
-                                chunks.append(_flush(sent.split()))
+                                # Single sentence exceeds target and has no
+                                # delimiters to split on — hard-split by words,
+                                # leaving room for the heading prefix.
+                                budget = max(1, target_tokens - _approx_tokens(heading_prefix))
+                                words = sent.split()
+                                for i in range(0, len(words), budget):
+                                    chunks.append(_flush(words[i : i + budget]))
                                 current_words = []
                                 current_tokens = 0
 

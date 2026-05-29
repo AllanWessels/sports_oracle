@@ -11,8 +11,9 @@ _app_root = str(Path(__file__).parent.parent)
 if _app_root not in sys.path:
     sys.path.insert(0, _app_root)
 
-from sports_oracle_shared.enums import FixtureStatus, Sport
-from core.normalize import (
+from sports_oracle_shared.enums import FixtureStatus, Sport  # noqa: E402
+
+from core.normalize import (  # noqa: E402
     coerce_fixture_status,
     coerce_sport,
     implied_prob,
@@ -89,7 +90,6 @@ class TestCoerceFixtureStatus:
 
 class TestParseDt:
     def test_iso_z_format(self) -> None:
-        from datetime import timezone
 
         dt = parse_dt("2025-03-15T15:00Z")
         assert dt is not None

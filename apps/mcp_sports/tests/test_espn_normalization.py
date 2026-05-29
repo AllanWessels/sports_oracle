@@ -8,7 +8,6 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -17,8 +16,8 @@ _app_root = str(Path(__file__).parent.parent)
 if _app_root not in sys.path:
     sys.path.insert(0, _app_root)
 
-from sports_oracle_shared.enums import FixtureStatus, Sport
-from sports_oracle_shared.sports import Fixture, Standings
+from sports_oracle_shared.enums import FixtureStatus, Sport  # noqa: E402
+from sports_oracle_shared.sports import Fixture, Standings  # noqa: E402
 
 
 class TestESPNScoreboardNormalization:
@@ -172,8 +171,9 @@ class TestESPNProviderAsync:
         self, espn_scoreboard_json: dict
     ) -> None:
         """get_fixtures should call the ESPN scoreboard endpoint and normalize results."""
-        import respx
         import httpx
+        import respx
+
         from providers.espn import ESPNProvider
 
         provider = ESPNProvider()
@@ -195,8 +195,9 @@ class TestESPNProviderAsync:
         self, espn_scoreboard_json: dict
     ) -> None:
         """get_live_scores should only return fixtures with status=LIVE."""
-        import respx
         import httpx
+        import respx
+
         from providers.espn import ESPNProvider
 
         provider = ESPNProvider()
@@ -227,8 +228,9 @@ class TestESPNProviderAsync:
         self, espn_standings_json: dict
     ) -> None:
         """get_standings should return a Standings object with rows."""
-        import respx
         import httpx
+        import respx
+
         from providers.espn import ESPNProvider
 
         provider = ESPNProvider()
@@ -290,6 +292,7 @@ class TestEnvelopeShape:
     def test_make_envelope_data_is_serializable(self) -> None:
         """Data containing pydantic model dicts should be JSON-serializable."""
         import json
+
         from tools._helpers import make_envelope
 
         env = make_envelope(

@@ -10,11 +10,10 @@ Conventions
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sports_oracle_shared.enums import FixtureStatus, Sport
-
 
 # ---------------------------------------------------------------------------
 # ID helpers
@@ -48,7 +47,7 @@ def parse_dt(value: str | None) -> datetime | None:
         try:
             dt = datetime.strptime(value, fmt)
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
             return dt
         except ValueError:
             continue

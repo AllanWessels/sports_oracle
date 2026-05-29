@@ -25,8 +25,8 @@ from sports_oracle_shared.sports import (
     Odds,
     Player,
     PlayerStats,
-    Standings,
     StandingRow,
+    Standings,
     Team,
     TeamStats,
 )
