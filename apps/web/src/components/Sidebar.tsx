@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useConversationsStore } from '../store/conversations'
 import type { ConversationSummary } from '../types'
 
@@ -132,6 +133,24 @@ export function Sidebar({ onSelectConversation, onNewChat }: Props) {
             onClick={() => onSelectConversation(conv.id)}
           />
         ))}
+      </div>
+
+      {/* Dashboards nav */}
+      <div className="px-3 py-2 border-t border-surface-700 space-y-1">
+        <Link
+          to="/dashboard/routing"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-300
+            hover:bg-surface-700 hover:text-white transition-colors"
+        >
+          <span aria-hidden="true">🧭</span> Routing dashboard
+        </Link>
+        <Link
+          to="/dashboard/eval"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-300
+            hover:bg-surface-700 hover:text-white transition-colors"
+        >
+          <span aria-hidden="true">🧪</span> Eval dashboard
+        </Link>
       </div>
 
       {/* Footer */}
