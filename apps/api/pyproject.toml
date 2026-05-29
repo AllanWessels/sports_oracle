@@ -22,6 +22,7 @@ dependencies = [
     "sports-oracle-shared",
     "sports-oracle-rag",
     "sports-oracle-db",
+    "sports-oracle-eval",  # pure routing/eval aggregates for the metrics API
 ]
 
 [project.optional-dependencies]
@@ -29,6 +30,7 @@ dev = [
     "pytest>=8,<9",
     "pytest-asyncio>=0.24,<0.25",
     "respx>=0.21,<0.22",
+    "aiosqlite>=0.20",  # in-memory DB for metrics-API tests
     "ruff",
     "mypy",
 ]

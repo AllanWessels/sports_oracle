@@ -25,7 +25,7 @@ jobs:
           - { name: db_py,      install: "packages/shared_py packages/db_py[dev]",  path: packages/db_py }
           - { name: eval_py,    install: "packages/shared_py packages/eval_py[dev]", path: packages/eval_py }
           - { name: ingest,     install: "packages/shared_py packages/rag_py packages/db_py packages/eval_py apps/ingest[dev]", path: apps/ingest }
-          - { name: api,        install: "packages/shared_py packages/rag_py packages/db_py apps/api[dev]", path: apps/api }
+          - { name: api,        install: "packages/shared_py packages/rag_py packages/db_py packages/eval_py apps/api[dev]", path: apps/api }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
