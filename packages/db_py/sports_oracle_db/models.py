@@ -10,6 +10,7 @@ from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+    DateTime,
     Float,
     ForeignKey,
     Index,
@@ -224,7 +225,10 @@ class EvalTrace(Base):
     citations: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
     prediction: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
     latency_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # tz-aware to match the migration (TIMESTAMP WITH TIME ZONE); without this
+    # the ORM infers a naive type and Postgres rejects tz-aware `since` filters.
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=_now,
         server_default=text("now()"),
         nullable=False,
@@ -236,7 +240,7 @@ class EvalTrace(Base):
     context_precision: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     context_recall: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     citation_valid: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    judged_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    judged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     judge_model: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     __table_args__ = (
