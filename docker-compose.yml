@@ -65,8 +65,8 @@ services:
     build:
       context: apps/web
       dockerfile: Dockerfile
-    ports:
-      - "5173:80"
+    # Port publishing is provided by docker-compose.override.yml for local dev
+    # (Vite on 5173). For a production-only run, add `-p 5173:80` or your own overlay.
     depends_on:
       - api
 

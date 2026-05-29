@@ -15,7 +15,7 @@ from datetime import UTC, datetime
 
 from qdrant_client import models as qmodels
 from sports_oracle_rag import ensure_collections, get_client
-from sports_oracle_rag.schema import COLLECTION_REFERENCE_DOCS, COLLECTION_SPORTS_CACHE
+from sports_oracle_rag.schema import COLLECTION_SPORTS_CACHE
 
 logger = logging.getLogger(__name__)
 

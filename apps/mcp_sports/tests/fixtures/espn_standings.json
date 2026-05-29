@@ -1,0 +1,44 @@
+{
+  "uid": "s:600~l:23~g:eng.1",
+  "season": {"type": 2, "year": 2025},
+  "children": [
+    {
+      "id": "eng.1",
+      "name": "English Premier League",
+      "standings": {
+        "entries": [
+          {
+            "team": {
+              "id": "364",
+              "displayName": "Liverpool",
+              "abbreviation": "LIV"
+            },
+            "stats": [
+              {"name": "gamesPlayed", "value": 30},
+              {"name": "wins", "value": 21},
+              {"name": "ties", "value": 5},
+              {"name": "losses", "value": 4},
+              {"name": "points", "value": 68},
+              {"name": "rank", "value": 1}
+            ]
+          },
+          {
+            "team": {
+              "id": "360",
+              "displayName": "Manchester United",
+              "abbreviation": "MAN"
+            },
+            "stats": [
+              {"name": "gamesPlayed", "value": 30},
+              {"name": "wins", "value": 14},
+              {"name": "ties", "value": 7},
+              {"name": "losses", "value": 9},
+              {"name": "points", "value": 49},
+              {"name": "rank", "value": 8}
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

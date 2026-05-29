@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime, timedelta
-from enum import Enum
-from typing import Any, Optional
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -23,7 +23,8 @@ ALL_COLLECTIONS = (COLLECTION_SPORTS_CACHE, COLLECTION_REFERENCE_DOCS, COLLECTIO
 # TTL table (seconds) per data class
 # ---------------------------------------------------------------------------
 
-class DataClass(str, Enum):
+
+class DataClass(StrEnum):
     API_RESPONSE = "api_response"
     QA_ANSWER = "qa_answer"
     NEWS_ARTICLE = "news_article"
@@ -31,9 +32,9 @@ class DataClass(str, Enum):
 
 
 _TTL_SECONDS: dict[DataClass, int] = {
-    DataClass.API_RESPONSE: 60 * 60,          # 1 hour
-    DataClass.QA_ANSWER: 6 * 60 * 60,         # 6 hours
-    DataClass.NEWS_ARTICLE: 7 * 24 * 60 * 60, # 7 days
+    DataClass.API_RESPONSE: 60 * 60,            # 1 hour
+    DataClass.QA_ANSWER: 6 * 60 * 60,           # 6 hours
+    DataClass.NEWS_ARTICLE: 7 * 24 * 60 * 60,   # 7 days
     DataClass.REFERENCE_DOC: 365 * 24 * 60 * 60,  # 1 year (effectively permanent)
 }
 
@@ -62,15 +63,16 @@ def is_expired(exp: datetime, *, now: datetime | None = None) -> bool:
 # Payload models (stored in Qdrant point payloads)
 # ---------------------------------------------------------------------------
 
+
 class BasePayload(BaseModel):
     """Fields common to all Qdrant point payloads."""
 
     chunk_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     text: str
-    title: Optional[str] = None
-    url: Optional[str] = None
-    source: Optional[str] = None
-    sport: Optional[str] = None
+    title: str | None = None
+    url: str | None = None
+    source: str | None = None
+    sport: str | None = None
     fetched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -89,7 +91,7 @@ class SportsCachePayload(BasePayload):
         *,
         now: datetime | None = None,
         **kwargs: Any,
-    ) -> "SportsCachePayload":
+    ) -> SportsCachePayload:
         exp = expires_at(data_class, now=now)
         return cls(text=text, data_class=data_class, expires_at=exp, **kwargs)
 
@@ -97,12 +99,12 @@ class SportsCachePayload(BasePayload):
 class ReferenceDocPayload(BasePayload):
     """Payload for the ``reference_docs`` collection."""
 
-    section_title: Optional[str] = None
-    doc_hash: Optional[str] = None  # sha256 of source content, for change detection
+    section_title: str | None = None
+    doc_hash: str | None = None  # sha256 of source content, for change detection
 
 
 class NewsPayload(BasePayload):
     """Payload for the ``news`` collection."""
 
-    published_at: Optional[datetime] = None
-    feed_url: Optional[str] = None
+    published_at: datetime | None = None
+    feed_url: str | None = None

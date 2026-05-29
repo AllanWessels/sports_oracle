@@ -119,9 +119,9 @@ def heading_aware_chunk(
         current_words: list[str] = []
         current_tokens = 0
 
-        def _flush(words: list[str]) -> str:
+        def _flush(words: list[str], _prefix: str = heading_prefix) -> str:
             body = " ".join(words)
-            return (heading_prefix + body).strip()
+            return (_prefix + body).strip()
 
         for para in paragraphs:
             para_tokens = _approx_tokens(para)

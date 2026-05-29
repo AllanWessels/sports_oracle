@@ -23,9 +23,9 @@ async def persist_turn(
     """
     try:
         from sports_oracle_db import repository as repo  # type: ignore
-        from sports_oracle_db.session import get_session  # type: ignore
+        from sports_oracle_db.session import get_session_factory  # type: ignore
 
-        async with get_session() as session:
+        async with get_session_factory()() as session:
             if not conversation_id:
                 conv = await repo.create_conversation(session, title=user_message[:60])
                 conversation_id = str(conv.id)

@@ -22,12 +22,14 @@ if TYPE_CHECKING:
     from fastembed import TextEmbedding
     from fastembed.rerank.cross_encoder import TextCrossEncoder
     from fastembed.sparse import SparseTextEmbedding
+    from sports_oracle_shared.rag import RagChunk
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Device resolution
 # ---------------------------------------------------------------------------
+
 
 def _use_cuda() -> bool:
     """Determine whether to use CUDA based on EMBED_DEVICE and availability."""
@@ -63,9 +65,9 @@ def _use_cuda() -> bool:
 # Lazy singletons
 # ---------------------------------------------------------------------------
 
-_dense_encoder: "TextEmbedding | None" = None
-_sparse_encoder: "SparseTextEmbedding | None" = None
-_reranker: "TextCrossEncoder | None" = None
+_dense_encoder: TextEmbedding | None = None
+_sparse_encoder: SparseTextEmbedding | None = None
+_reranker: TextCrossEncoder | None = None
 _cuda: bool | None = None  # cached result of _use_cuda()
 
 
@@ -76,7 +78,7 @@ def _get_cuda() -> bool:
     return _cuda
 
 
-def get_dense_encoder() -> "TextEmbedding":
+def get_dense_encoder() -> TextEmbedding:
     global _dense_encoder
     if _dense_encoder is None:
         from fastembed import TextEmbedding
@@ -96,7 +98,7 @@ def get_dense_encoder() -> "TextEmbedding":
     return _dense_encoder
 
 
-def get_sparse_encoder() -> "SparseTextEmbedding":
+def get_sparse_encoder() -> SparseTextEmbedding:
     global _sparse_encoder
     if _sparse_encoder is None:
         from fastembed.sparse import SparseTextEmbedding
@@ -116,7 +118,7 @@ def get_sparse_encoder() -> "SparseTextEmbedding":
     return _sparse_encoder
 
 
-def get_reranker() -> "TextCrossEncoder":
+def get_reranker() -> TextCrossEncoder:
     global _reranker
     if _reranker is None:
         from fastembed.rerank.cross_encoder import TextCrossEncoder
@@ -129,6 +131,7 @@ def get_reranker() -> "TextCrossEncoder":
 # ---------------------------------------------------------------------------
 # Public embedding functions
 # ---------------------------------------------------------------------------
+
 
 def embed_dense(texts: list[str]) -> list[list[float]]:
     """Return dense embeddings for a batch of texts.
@@ -162,7 +165,12 @@ def embed_sparse(texts: list[str]) -> list[dict[int, float]]:
         for sparse_emb in enc.embed(batch):
             # SparseEmbedding has .indices and .values arrays
             results.append(
-                {int(idx): float(val) for idx, val in zip(sparse_emb.indices, sparse_emb.values)}
+                {
+                    int(idx): float(val)
+                    for idx, val in zip(
+                        sparse_emb.indices, sparse_emb.values, strict=False
+                    )
+                }
             )
 
     return results
@@ -170,10 +178,10 @@ def embed_sparse(texts: list[str]) -> list[dict[int, float]]:
 
 def rerank(
     query: str,
-    chunks: list["RagChunk"],  # noqa: F821 — avoid circular import at module level
+    chunks: list[RagChunk],
     *,
     top_n: int | None = None,
-) -> list["RagChunk"]:  # noqa: F821
+) -> list[RagChunk]:
     """Cross-encoder rerank *chunks* for *query*, returning at most *top_n*.
 
     The returned list is sorted by descending cross-encoder score and each
@@ -182,15 +190,13 @@ def rerank(
     if not chunks:
         return []
 
-    from sports_oracle_shared.rag import RagChunk  # local import avoids circularity
-
     ranker = get_reranker()
     texts = [c.text for c in chunks]
 
     scores: list[float] = list(ranker.rerank(query, texts))
 
     scored_chunks = sorted(
-        zip(scores, chunks), key=lambda t: t[0], reverse=True
+        zip(scores, chunks, strict=False), key=lambda t: t[0], reverse=True
     )
 
     result = []

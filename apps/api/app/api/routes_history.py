@@ -14,9 +14,9 @@ router = APIRouter()
 async def list_conversations() -> list[dict]:
     try:
         from sports_oracle_db import repository as repo  # type: ignore
-        from sports_oracle_db.session import get_session  # type: ignore
+        from sports_oracle_db.session import get_session_factory  # type: ignore
 
-        async with get_session() as session:
+        async with get_session_factory()() as session:
             convs = await repo.list_conversations(session)
             return [
                 {"id": str(c.id), "title": c.title, "updated_at": c.updated_at.isoformat()}
@@ -31,9 +31,9 @@ async def list_conversations() -> list[dict]:
 async def get_messages(conversation_id: str) -> dict:
     try:
         from sports_oracle_db import repository as repo  # type: ignore
-        from sports_oracle_db.session import get_session  # type: ignore
+        from sports_oracle_db.session import get_session_factory  # type: ignore
 
-        async with get_session() as session:
+        async with get_session_factory()() as session:
             messages = await repo.get_messages(session, conversation_id)
             return {
                 "messages": [

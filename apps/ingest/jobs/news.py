@@ -16,8 +16,8 @@ from email.utils import parsedate_to_datetime
 from typing import Any
 
 import feedparser
-from qdrant_client import models as qmodels
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from qdrant_client import models as qmodels
 from sports_oracle_rag import (
     COLLECTION_NEWS,
     build_point,
