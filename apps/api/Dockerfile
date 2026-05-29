@@ -27,11 +27,13 @@ RUN pip install -e /app/apps/api
 
 WORKDIR /app/apps/api
 
-# Pre-download local embedding/reranker models so the container starts offline.
+# Bake the embedding/reranker models into the image so the FIRST query doesn't
+# pay a multi-minute cold download. Instantiating each encoder triggers the
+# model fetch + cache at build time (the previous find_spec check was a no-op).
 RUN python -c "import os; os.environ.setdefault('EMBED_DEVICE','cpu'); \
-import importlib; \
-mod=importlib.util.find_spec('sports_oracle_rag'); \
-print('rag present' if mod else 'rag missing')" || true
+from sports_oracle_rag.embeddings import get_dense_encoder, get_sparse_encoder, get_reranker; \
+get_dense_encoder(); get_sparse_encoder(); get_reranker(); \
+print('embedding models cached')"
 
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

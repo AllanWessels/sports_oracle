@@ -44,11 +44,13 @@ class Conversation(Base):
     )
     title: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=_now,
         server_default=text("now()"),
         nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=_now,
         server_default=text("now()"),
         nullable=False,
@@ -83,6 +85,7 @@ class Message(Base):
     intent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     idx: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=_now,
         server_default=text("now()"),
         nullable=False,
@@ -121,7 +124,7 @@ class Citation(Base):
     provider: Mapped[str] = mapped_column(Text, nullable=False)
     endpoint: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    fetched_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    fetched_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # relationship
@@ -151,6 +154,7 @@ class Prediction(Base):
     factors: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
     caveats: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         default=_now,
         server_default=text("now()"),
         nullable=False,
@@ -178,8 +182,8 @@ class SemanticCacheMeta(Base):
     query_text: Mapped[str] = mapped_column(Text, nullable=False)
     entities: Mapped[Optional[Any]] = mapped_column(JSON, nullable=True)
     tool: Mapped[str] = mapped_column(Text, nullable=False)
-    fetched_at: Mapped[datetime] = mapped_column(nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     hit_count: Mapped[int] = mapped_column(
         Integer, default=0, server_default=text("0"), nullable=False
     )
