@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Components } from 'react-markdown'
@@ -36,9 +37,9 @@ function makeCitationComponents(citations: CitationEvent[]): Components {
 }
 
 function transformChildren(
-  children: React.ReactNode,
+  children: ReactNode,
   citations: CitationEvent[],
-): React.ReactNode {
+): ReactNode {
   if (!Array.isArray(children)) {
     return transformNode(children, citations)
   }
@@ -47,7 +48,7 @@ function transformChildren(
   ))
 }
 
-function transformNode(node: React.ReactNode, citations: CitationEvent[]): React.ReactNode {
+function transformNode(node: ReactNode, citations: CitationEvent[]): ReactNode {
   if (typeof node !== 'string') return node
   // Split on [n] markers
   const parts = node.split(/(\[\d+\])/)

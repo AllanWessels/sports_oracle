@@ -8,6 +8,9 @@ dependencies = [
     "asyncpg>=0.30,<0.31",
     "alembic>=1.13,<2",
     "pydantic>=2.9,<3",
+    # sports-oracle-shared is a sibling package (../shared_py).
+    # When installing from this monorepo use: pip install -e ../shared_py first,
+    # or replace with a VCS/path reference for automated environments.
     "sports-oracle-shared>=0.1.0",
 ]
 
