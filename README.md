@@ -34,7 +34,12 @@ make up-gpu                 # ...or with the NVIDIA GPU overlay
 make seed                   # load the reference-docs corpus
 ```
 
-Then open http://localhost:5173.
+Then open http://localhost:5173. Two live dashboards ship alongside the chat:
+
+- **http://localhost:5173/dashboard/routing** — LangGraph traffic: what % of turns
+  go factual / prediction / chitchat / cache-hit, latency and effectiveness per route.
+- **http://localhost:5173/dashboard/eval** — RAGAS scores (faithfulness, relevancy,
+  context precision/recall), citation-validity rate, and recent judged turns.
 
 ## Key choices
 
@@ -45,6 +50,21 @@ Then open http://localhost:5173.
   SPLADE sparse + cross-encoder rerank, **GPU-accelerated when available**.
 - **Predictions:** confidence is *blended* (data completeness × model self-rating ×
   odds agreement), never raw LLM output. Always shows factors + caveats.
+
+## Evaluation & observability
+
+Every turn is captured to an `eval_traces` row (free, in-graph) and scored **out of
+band** by an async [RAGAS](https://docs.ragas.io) judge on the ingest worker —
+faithfulness, answer relevancy, context precision/recall (Claude judge + **local**
+fastembed embeddings, no paid embedding API) plus a deterministic citation-contract
+check. The two dashboards above read a metrics API (`/metrics/routing`, `/eval`,
+`/traces`) and refresh live. Run the scorecard over the golden set with `make eval`.
+
+Predictions are evaluated only for groundedness of their cited references — never
+for whether the pick was "right".
+
+CI (GitHub Actions) gates every PR: `ruff` + `pytest` per component, web build +
+`vitest`, and a **Playwright** real-navigation e2e suite. See `packages/eval_py`.
 
 ## Docs
 

@@ -13,8 +13,8 @@ committed + pushed.
 | 5 | RAG pipeline (Qdrant hybrid + rerank + cache) | ✅ done | rag_py: fastembed GPU, 3 collections, 58 tests; ingest worker |
 | 6 | Prediction sub-flow + confidence blend | ✅ done | features→reason→blended (completeness×self×odds) |
 | 7 | Multi-provider breadth + hardening | 🔄 partial | providers in place; live E2E + rate-limit tuning pending |
-| 8 | Evaluation & observability (RAGAS + dashboards) | 🔄 in progress | per-turn `eval_traces` capture, async RAGAS judge, eval + routing dashboards |
-| 9 | CI + extensive test harness (Playwright UI nav) | 🔄 in progress | GitHub Actions gate; real browser-nav e2e, no theatre |
+| 8 | Evaluation & observability (RAGAS + dashboards) | ✅ done | per-turn `eval_traces` capture, async RAGAS judge, eval + routing dashboards |
+| 9 | CI + extensive test harness (Playwright UI nav) | ✅ done | GitHub Actions gate; real browser-nav e2e, no theatre |
 
 **149 tests pass locally** (mcp_sports 69, db 19, rag 58, api 3). The api suite
 includes an in-process graph-flow integration test (router→gather→synthesize→
@@ -69,3 +69,15 @@ FastAPI routes, MCP client wiring.
   RAG API (`build_point`/`upsert`, Qdrant `Filter`, `data_class`). Fixed two real
   bugs found by tests: APISports `get_fixtures` contract drift and a chunker
   overflow on delimiter-free oversized sections.
+- **M8+M9** — Evaluation & observability + CI/test harness. `packages/eval_py`
+  (RAGAS faithfulness/relevancy/context precision+recall with a Claude judge and
+  local fastembed embeddings, a deterministic citation-contract check, routing
+  aggregates, golden dataset, `make eval`). Every turn is captured to an
+  `eval_traces` row by an in-graph `eval_capture` node and scored **out of band**
+  by an async RAGAS judge on the ingest worker. A metrics API (`/metrics/*`) feeds
+  two live React dashboards — **routing** (traffic % per intent/cache, latency,
+  effectiveness) and **eval** (RAGAS scores, citation validity, recent traces).
+  GitHub Actions CI (ruff + pytest matrix, web build + vitest, Playwright
+  real-navigation e2e) gates every PR. Also fixed pre-existing breaks CI exposed:
+  the web `tsc` build, the Tailwind typography plugin, and broken monorepo
+  workspace packaging.
