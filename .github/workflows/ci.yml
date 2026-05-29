@@ -23,6 +23,7 @@ jobs:
           - { name: mcp_sports, install: "packages/shared_py apps/mcp_sports[dev]", path: apps/mcp_sports }
           - { name: rag_py,     install: "packages/shared_py packages/rag_py[dev]", path: packages/rag_py }
           - { name: db_py,      install: "packages/shared_py packages/db_py[dev]",  path: packages/db_py }
+          - { name: eval_py,    install: "packages/shared_py packages/eval_py[dev]", path: packages/eval_py }
           - { name: api,        install: "packages/shared_py packages/rag_py packages/db_py apps/api[dev]", path: apps/api }
     steps:
       - uses: actions/checkout@v4
