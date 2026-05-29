@@ -43,6 +43,23 @@ adapter normalizes upstream JSON into the shared sports models.
 - Secrets only via `.env`; keyless providers must keep working with no keys set.
 - Tests: `pytest` with `respx` mocking upstream HTTP. Don't hit live APIs in unit tests.
 
+## Working directives
+
+Standing rules for how work is done in this repo (humans and agents):
+
+1. **Branch per feature/fix.** Never commit to `main` directly. Each feature or
+   fix set gets its own branch: build → test → commit → push → open a PR.
+   GitHub Actions CI (`.github/workflows/ci.yml`: ruff + pytest per component,
+   web build + vitest, Playwright e2e) is the merge gate.
+2. **Sub-agents run on Sonnet** whenever the task doesn't require Opus-level
+   reasoning — pass the model explicitly.
+3. **Extensive test harness, no theatre.** Tests must assert observable outcomes.
+   UI tests do **real navigation verification** with Playwright (drive routes,
+   click, assert what a user would see) — not snapshot/render-only tests.
+4. **Eval + dashboards are first-class.** Every turn is captured to `eval_traces`
+   and judged async with RAGAS; the eval and routing dashboards (`/dashboard/*`)
+   stay current as features change. See `docs/PROGRESS.md` (M8).
+
 ## Build order & status
 
 Phases M0–M6 are done; M7 (live E2E + provider hardening) is partial — see
